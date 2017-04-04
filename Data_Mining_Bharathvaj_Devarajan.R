@@ -35,7 +35,7 @@ ggplot(data= country_count,aes(x=country_txt,y=freq,fill=country_txt))+
   ggtitle("Terrorist Attacks by Country") +
   labs(x="Country",y="Number of Attacks") 
 #3 
-#world <- map_data("world")
-#ggplot()+
-#  geom_polygon(data = world, aes(x =  long, y = lat, group = group))+  
-#  geom_point(data = df_terror, aes(x = longitude, y = latitude, colour = country_txt ),show.legend = FALSE)
+world <- map_data("world")
+ggplot()+
+  geom_polygon(data = world, aes(x =  long, y = lat, group = group))+  
+  geom_point(data = df_terror, aes(x = longitude, y = latitude, colour = country_txt ),show.legend = FALSE)
