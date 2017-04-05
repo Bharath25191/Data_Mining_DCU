@@ -57,7 +57,7 @@ ggplot(data= target_count,aes(x=targtype1_txt,y=freq,fill=targtype1_txt))+
   ggtitle("Weapon Type Frequency") +
   labs(x="Weapon",y="Count") 
 
-# 4
+#5 The locations of terrorist incidents around the world
 world <- map_data("world")
 ggplot()+
   geom_polygon(data = world, aes(x =  long, y = lat, group = group))+  
