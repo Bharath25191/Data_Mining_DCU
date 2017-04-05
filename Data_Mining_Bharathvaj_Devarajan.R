@@ -37,8 +37,6 @@ ggplot(data= country_count,aes(x=country_txt,y=freq,fill=country_txt))+
 
 #3 Weapon Preference
 weapon_count <- count(df_terror, "weaptype1_txt")
-#country_count = filter(country_count,freq > 4000)
-#weapon_count$weaptype1_txt<-reorder(weapon_count$weaptype1_txt,weapon_count$freq)
 print(weapon_count)
 weapon_count <- filter(weapon_count, !grepl('Vehicle', weaptype1_txt))
 ggplot(data= weapon_count,aes(x=weaptype1_txt,y=freq,fill=weaptype1_txt))+
@@ -49,13 +47,11 @@ ggplot(data= weapon_count,aes(x=weaptype1_txt,y=freq,fill=weaptype1_txt))+
 
 #4 Weapon Preference
 target_count <- count(df_terror,"targtype1_txt")
-#weapon_count$weaptype1_txt<-reorder(weapon_count$weaptype1_txt,weapon_count$freq)
-#weapon_count <- filter(weapon_count, !grepl('Vehicle', weaptype1_txt))
 ggplot(data= target_count,aes(x=targtype1_txt,y=freq,fill=targtype1_txt))+
   geom_bar(stat="identity",width = 0.8)+
   theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+
-  ggtitle("Weapon Type Frequency") +
-  labs(x="Weapon",y="Count") 
+  ggtitle("Target Types") +
+  labs(x="Target",y="Count") 
 
 #5 The locations of terrorist incidents around the world
 world <- map_data("world")
