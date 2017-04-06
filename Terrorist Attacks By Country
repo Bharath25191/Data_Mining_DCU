@@ -1,0 +1,29 @@
+library(ggplot2) 
+library(readr) 
+library(data.table)
+library(dplyr)
+library(ggmap)
+#library(graphZoo)
+library(RColorBrewer)
+library(animation)
+library(scales)
+select_cols <- c(1:4, 8:12, 14:15, 27, 29:30, 35:36, 41:42, 59, 81:82, 98, 101)
+col_class <- rep("NULL", 134)
+col_class[select_cols] <- NA
+gtd <- as.data.table(read.csv("/Users/nitinyadav/Desktop/data analysis:mining", 
+           colClasses = col_class))  %>%
+  mutate(idate = ISOdate(iyear, imonth, iday))
+attacks <- group_by(gtd, country_txt) %>%
+  summarize(number = length(eventid)) %>%
+  ungroup() %>%
+  mutate(rank = rank(-number))
+
+g <- ggplot(filter(attacks, rank < 51), 
+            aes(x = reorder(country_txt, number), y = number)) +
+  geom_bar(stat = "identity", color = "white",fill ="#990000") + 
+  coord_flip() + 
+  ggtitle(bquote(atop("Terrorist attacks by country",
+                      atop("since 1970")))) + 
+  ylab("Number of events") +
+  #theme_graphzoo(base_size = 13, family = "Avenir Next") +
+  theme(axis.title.y = element_blank())
