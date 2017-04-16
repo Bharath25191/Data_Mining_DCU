@@ -1,5 +1,6 @@
 library(dplyr)
 library(ggplot2)
+library(randomForest)
 
 # Predicting the success of a terror attack based on the available features
 
@@ -27,7 +28,39 @@ df_success <- sample_n(df_success,12477)
 dim(df_success)
 
 yf=df_failure %>% select(success)
-df_failure$success <- NULL
+#df_failure$success <- NULL
 
 ys= df_success %>% select(success)
-df_success$success <- NULL
+#df_success$success <- NULL
+df <- rbind(df_success,df_failure)
+dim(df)
+
+
+# 10 Fold Cross validation 
+# Shuffle
+df<-df[sample(nrow(df)),]
+# generate array containing fold-number for each sample (row)
+folds <- cut(seq(1,nrow(df)),breaks=10,labels=FALSE)
+
+for(i in 1:10){
+  #Segement your data by fold using the which() function 
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  testData <- df[testIndexes, ]
+  trainData <- df[-testIndexes, ]
+  #Use the test and train data partitions however you desire...
+}
+Y_train <- trainData %>% select(success)
+dim(Y_train)
+y_test  <- testData %>% select(success)
+trainData$success <- NULL
+testData$success <- NULL
+
+trainData$success <- as.character(trainData$success)
+trainData$success <- as.factor(trainData$success)
+
+testData$success <- as.character(testData$success)
+testData$success <- as.factor(testData$success)
+rf <- randomForest(success ~ .,trainData, ntree=100, importance=TRUE)
+predicted <- predict(rf,testData)
+print(predicted)
+print(paste("Accuracy :",mean(predicted == testData$success)))
