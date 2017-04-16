@@ -46,3 +46,17 @@ pca_df$y = df$nkill
 
 model <- lm(data = pca_df, y ~ .)
 summary(model)
+
+model2 <- glm(data = pca_df, y ~ .,family="poisson")
+summary(model2)
+
+keeps2 <- c('iyear', 'extended', 'suicide', 'ishostkid', 'weaptype1','attacktype1', 'targtype1')
+df_2<- df_terror[keeps2]
+df_2$y <- df_terror$nkill
+df_2[is.na(df_2)] <- 0
+model3 <- glm(data = pca_df, y ~ .,method = "poisson")
+str(df_2)
+
+summary(model3)
+
+
