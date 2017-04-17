@@ -1,3 +1,6 @@
+#Exploratory Analysis for Terrorist Groups:
+#Date: 02:04:2017
+
 library(dplyr)
 library(ggplot2)
 library(maps)
@@ -6,7 +9,7 @@ df_terror <- read.csv("C:\\Users\\Lenovo\\Desktop\\sem2\\ca683_data_mining\\proj
 # Dimensions
 dim(df_terror)
 # The top 6 records of the table
-head(df_terror)
+head(df_terror, 2)
 # A concise summary of the table using the dplyr package function 
 glimpse(df_terror)
 # Summary Statistics of the Terror dataset
@@ -20,6 +23,57 @@ world <- map_data("world")
 ggplot()+
   geom_polygon(data = world, aes(x =  long, y = lat, group = group))+  
   geom_point(data = df_terror, aes(x = longitude, y = latitude, colour = country_txt ),size=0.03,show.legend = FALSE)
+
+#Better understand the terrorist perpetrators
+#Check the factors
+alt <- levels(factor(df_terror$gname))
+alt
+
+#1. Who are they?
+#install.packages("plotly")
+library(plotly)
+library(plyr)
+library(dplyr)
+
+#Sort the Terrorist Groups in Descending order and get the top 16 groups according to the 
+#Incidents 
+groups = as.data.frame(head(sort(table(df_terror$gname),decreasing=TRUE),16))
+#Remove the Unknow Group
+groups<- groups[-1,]
+#Check if the unknown group has been deleted and the remaining top 15 groups are present 
+groups
+
+#Plot the Top 15 terrorist groups with More incidents using GGPLOT
+ggplot(groups, aes(x=Var1, y=Freq))+
+  geom_bar(stat='identity',fill='blue')+
+  coord_flip()+
+  ggtitle("Top 15 groups with more incidents") +
+  labs(x="Terrorist_Groups",y="Incidents")
+  ggtitle("Terrorist Attacks by Country") +
+  labs(x="Country",y="Number of Attacks") country_count
+  
+#2.Where are they from?
+country = as.data.frame(head(sort(table(df_terror$country_txt),decreasing=TRUE),15))
+country
+
+ggplot(country, aes(x=Var1, y=Freq))+
+  geom_bar(stat='identity',fill='blue')+
+  coord_flip()+
+  ggtitle("Top countries with more incidents") +
+  labs(x="Countries",y="Incidents")
+
+#3.Do they act in groups? Are they working alone?
+Act1 <- data.frame( df_terror$region_txt,
+                    df_terror$nperps)
+str(Act1)
+Act<-Act1[Act1$df_terror.nperps >=0,]
+str(Act)
+
+sorted_act<- head(sort(table(Act$df_terror.region_txt), decreasing = TRUE, Act$df_terror.nperps),15)head(sorted_act)
+typeof(sorted_act)
+ggplot(sorted_act, aes(x=region_txt, y=median(nperps)))+
+         geom_bar(stat='identity', fill='blue')+
+  coord_flip()
 
 #Function to multiplot the attacks on different regions
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
@@ -64,45 +118,39 @@ d3 <- df_terror[df_terror$country_txt == "Iraq", ]
 d4 <- df_terror[df_terror$country_txt == "Egypt", ] 
 
 
-  p2 <- ggplot(d1, aes(x=iyear)) + 
+p2 <- ggplot(d1, aes(x=iyear)) + 
   #geom_histogram(aes(y = ..density..), alpha = 0.7, fill = "#333333", binwidth = 1) + 
   geom_density(fill = "#0080ff", alpha = 0.5) + 
   theme(panel.background = element_rect(fill = '#ffffff')) + 
   labs(x="Year", y="Density", title="Attacks on United States")
 
-  p3 <- ggplot(d2, aes(x=iyear)) + 
+p3 <- ggplot(d2, aes(x=iyear)) + 
   #geom_histogram(aes(y = ..density..), alpha = 0.7, fill = "#333333", binwidth = 1) + 
   geom_density(fill = "#8000ff", alpha = 0.5) + 
   theme(panel.background = element_rect(fill = '#ffffff')) + 
   labs(x="Year", y="Density", title="Attacks on India")
 
-  p4 <- ggplot(d3, aes(x=iyear)) + 
+p4 <- ggplot(d3, aes(x=iyear)) + 
   #geom_histogram(aes(y = ..density..), alpha = 0.7, fill = "#333333", binwidth = 1) + 
   geom_density(fill = "#ff0080", alpha = 0.5) + 
   theme(panel.background = element_rect(fill = '#ffffff')) + 
   labs(x="Year", y="Density", title="Attacks on Iraq")
 
-  p5 <- ggplot(d4, aes(x=iyear)) + 
+p5 <- ggplot(d4, aes(x=iyear)) + 
   #geom_histogram(aes(y = ..density..), alpha = 0.7, fill = "#333333", binwidth = 1) + 
   geom_density(fill = "#ffbf00", alpha = 0.5) + 
   theme(panel.background = element_rect(fill = '#ffffff')) + 
   labs(x="Year", y="Density", title="Attacks on Egypt")
 
-  multiplot(p2, p3, p4, p5, cols=2)
+multiplot(p2, p3, p4, p5, cols=2)
+
+
+
+
+
+
+
   
   
-  set.seed(1492) 
   
-  l <- layout.fruchterman.reingold(net, niter=5000, area=vcount(net)^10*10)
   
-  plot(net,  layout=l,
-       edge.arrow.size=.5, 
-       vertex.label.cex=0.75, 
-       vertex.label.family="Helvetica",
-       vertex.label.font=2,
-       vertex.shape="circle", 
-       vertex.size=30, 
-       vertex.label.color="black", 
-       edge.curved=.1)
-  
-  ggplot()
