@@ -3,6 +3,9 @@ library(magrittr)
 library(ggplot2)
 library(corrgram)
 library(data.table)
+library(randomForest)
+library(e1071)
+library(caret)
 
 str(df_terror)
 corr_new <- round(cor(df_terror[sapply(df_terror, is.numeric)], use="pair"),2)
@@ -43,9 +46,71 @@ summary(model)
 model2 <- glm(data = df, nkill ~ nkillus + nkillter + nwound + claimmode3 + ishostkid, family = quasipoisson(link=log))
 summary(model2)
 
-nb.fit = glm(data = df, nkill ~ nkillus + nkillter + nwound + claimmode3 + ishostkid, family = negative.binomial(theta=1,link="identity"),start = model2$coefficients)
-summary(nb.fit)
 
-# Chi Square test to check the fit of the model
-1-pchisq(328888,156771)
+# Grouping the kills into low medium and high and predicting the category
+df_terror <- read.csv("C:\\DCU\\Data Mining\\Mini Projects\\globalterrorismdb.csv",stringsAsFactors = TRUE)
+str(df_terror[sapply(df_terror, is.numeric)])
+keeps <- c("eventid", "iyear","imonth","iday","extended","country","region","latitude","longitude","specificity",
+           "vicinity","crit1","crit2","crit3","doubtterr","success","suicide","attacktype1","targtype1",
+           "targsubtype1","natlty1","ingroup","weaptype1","nkill","nkillus","nkillter","property","ishostkid","ransom",
+           "INT_LOG","INT_IDEO","INT_MISC","INT_ANY","nwound","claimmode3")
+df_num <-df_terror[sapply(df_terror, is.numeric)]
+df<- df_num[keeps]
+df[is.na(df)] <- 0
+# Dimensions
+df_terror_new <- df %>% filter(nkill != 0)
+dim(df_terror_new)
+head(df_terror_new$nkill)
+df_terror_new$kill <- ifelse(df_terror_new$nkill > 5, 1, 0)
+head(df_terror_new$kill)
+df_terror_new$kill <- as.factor(df_terror_new$kill)
+
+table(df_terror_new$kill)/nrow(df_terror_new)
+
+# Creating the Sample 
+sample.ind <- sample(2, 
+                     nrow(df_terror_new),
+                     replace = T,
+                     prob = c(0.6,0.4))
+df_terror_new.train <- df_terror_new[sample.ind==1,]
+df_terror_new.test <- df_terror_new[sample.ind==2,]
+
+table(df_terror_new.train$kill)/nrow(df_terror_new.train)
+table(df_terror_new.test$kill)/nrow(df_terror_new.test)
+
+# Building The Model
+
+cols <- names(df_terror_new.train)
+# Exclude ID or Response variable
+cols <- cols[!cols %in% c("kill","nkill")]
+
+# add + sign between exploratory variables
+cols1 <- paste(cols, collapse = "+")
+
+# Add response variable and convert to a formula object
+rf.form <- as.formula(paste("kill", cols1, sep = " ~ "))
+df_terror_new.train[is.na(df_terror_new.train)] <- 0
+df_terror_new.rf <- randomForest(rf.form,
+                              df_terror_new.train,
+                              ntree=50,
+                              importance=T)
+
+# Error Rates
+plot(df_terror_new.rf)
+# Variable Importance
+varImpPlot(df_terror_new.rf,
+           sort = T,
+           main="Variable Importance",
+           n.var=5)
+df_terror_new.train$predicted.response <- predict( df_terror_new.rf , df_terror_new.train)
+
+# Create Confusion Matrix
+confusionMatrix(df_terror_new.train$predicted.response,
+                reference=df_terror_new.train$kill)
+
+df_terror_new.test$predicted.response <- predict(df_terror_new.rf ,df_terror_new.test)
+
+# Create Confusion Matrix
+confusionMatrix(data=df_terror_new.test$predicted.response,
+                reference=df_terror_new.test$kill)
 
