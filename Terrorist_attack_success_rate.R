@@ -53,8 +53,8 @@ for(i in 1:10){
 Y_train <- trainData %>% select(success)
 dim(Y_train)
 y_test  <- testData %>% select(success)
-trainData$success <- NULL
-testData$success <- NULL
+#trainData$success <- NULL
+#testData$success <- NULL
 
 trainData$success <- as.character(trainData$success)
 trainData$success <- as.factor(trainData$success)
@@ -72,7 +72,7 @@ print(accuracy)
 
 cm <- confusionMatrix(data = predicted, reference = testData$success)
 
-draw_confusion_matrix <- function(cm) {
+draw_confusion_matrix <- function(cm,a,b) {
   
   layout(matrix(c(1,1,2)))
   par(mar=c(2,2,2,2))
@@ -81,15 +81,15 @@ draw_confusion_matrix <- function(cm) {
   
   # create the matrix 
   rect(150, 430, 240, 370, col='#3F97D0')
-  text(195, 435, 'Success', cex=1.2)
+  text(195, 435, a, cex=1.2)
   rect(250, 430, 340, 370, col='#F7AD50')
-  text(295, 435, 'Failure', cex=1.2)
+  text(295, 435, b, cex=1.2)
   text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
   text(245, 450, 'Actual', cex=1.3, font=2)
   rect(150, 305, 240, 365, col='#F7AD50')
   rect(250, 305, 340, 365, col='#3F97D0')
-  text(140, 400, 'Success', cex=1.2, srt=90)
-  text(140, 335, 'Failure', cex=1.2, srt=90)
+  text(140, 400, a, cex=1.2, srt=90)
+  text(140, 335, b, cex=1.2, srt=90)
   
   # add in the cm results 
   res <- as.numeric(cm$table)
@@ -118,4 +118,5 @@ draw_confusion_matrix <- function(cm) {
   text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
 }  
 
-draw_confusion_matrix(cm)
+draw_confusion_matrix(cm,"Success","Failure")
+

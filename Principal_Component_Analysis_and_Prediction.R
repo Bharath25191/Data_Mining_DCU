@@ -111,6 +111,6 @@ confusionMatrix(df_terror_new.train$predicted.response,
 df_terror_new.test$predicted.response <- predict(df_terror_new.rf ,df_terror_new.test)
 
 # Create Confusion Matrix
-confusionMatrix(data=df_terror_new.test$predicted.response,
+cm <- confusionMatrix(data=df_terror_new.test$predicted.response,
                 reference=df_terror_new.test$kill)
-
+draw_confusion_matrix(cm,"Low","High")
